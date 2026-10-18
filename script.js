@@ -1,93 +1,62 @@
 const $ = (id) => document.getElementById(id);
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
-function rain(emoji = "🍌", n = 18) {
-  for (let i = 0; i < n; i++) {
-    const s = document.createElement("span");
-    s.className = "fall";
-    s.textContent = emoji;
-    s.style.left = Math.random() * 95 + "vw";
-    s.style.animationDuration = 2 + Math.random() * 2.5 + "s";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 5000);
-  }
-}
+// Scroll reveal
+const io = new IntersectionObserver(
+  (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
+  { threshold: 0.12 }
+);
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-// ⭐ Star button
-let stars = 99, starred = false;
-$("star").onclick = () => {
-  starred = !starred;
-  stars += starred ? 1 : -1;
-  $("starN").textContent = stars;
-  if (starred) rain("⭐");
-};
-
-// 💬 Leaked chat
-const convo = [
-  ["s", "Soha: Sai you are a monkey 🐒"],
-  ["o", "Sai: Excuse me?? 😤"],
-  ["s", "Soha: Yes. Ooh ooh aah aah."],
-  ["o", "Sai: Soha… why are you holding a banana?"],
-  ["s", "Soha: …No reason 🍌"],
-  ["o", "Sai: Why is there a banana peel on your head?"],
-  ["s", "Soha: It’s a fashion statement."],
-  ["o", "Sai: Case closed. YOU are the monkey 🐵"],
-  ["s", "Soha: …ok fine. 🙈"],
+// Primate Assessment Index
+const clean = [
+  "Entirely human. Remarkably well composed.",
+  "No primate traits detected. Excellent posture.",
+  "Classification: Human. Suspiciously elegant.",
+  "Fully cleared. The committee apologises for the inconvenience.",
 ];
-let playing = false;
-$("play").onclick = () => {
-  if (playing) return;
-  playing = true;
-  const chat = $("chat");
-  chat.innerHTML = "";
-  convo.forEach(([who, text], i) => {
-    setTimeout(() => {
-      const d = document.createElement("div");
-      d.className = "b " + who;
-      d.textContent = text;
-      chat.appendChild(d);
-      if (i === convo.length - 1) { rain("🐒"); playing = false; }
-    }, i * 900);
-  });
-};
-
-// 🔬 Monkey checker
-const cuties = [
-  "Not a monkey. Just a cutie. 💖",
-  "0% monkey. 100% queen. 👑",
-  "Monkey-free zone. You’re adorable. ✨",
-];
-$("check").onclick = () => {
+$("form").addEventListener("submit", (e) => {
+  e.preventDefault();
   const name = $("nameIn").value.trim();
-  if (!name) { $("out").textContent = "Type a name first! 🙈"; return; }
+  if (!name) return;
   const isSoha = name.toLowerCase().includes("soha");
-  const pct = isSoha ? 100 : Math.floor(Math.random() * 6);
-  $("fill").style.width = "0";
-  $("out").textContent = "Scanning " + name + "… 🔎";
+  const score = isSoha ? 97 : 2 + Math.floor(Math.random() * 8);
+  const fill = $("gfill");
+  fill.style.width = "0";
+  fill.classList.toggle("hi", isSoha);
+  $("result").classList.add("on");
   setTimeout(() => {
-    $("fill").style.width = pct + "%";
-    $("out").textContent = isSoha
-      ? name + " is " + pct + "% MONKEY 🐒 (certified)"
-      : name + " is " + pct + "% monkey. " + pick(cuties);
-    if (isSoha) rain("🍌");
-  }, 400);
+    fill.style.width = score + "%";
+    $("score").textContent = name + ": " + score + " / 100";
+    $("class").textContent = isSoha
+      ? "Classification: Monkey. High confidence. Banana involvement noted."
+      : pick(clean);
+  }, 150);
+});
+
+// Statements from the accused
+const statements = [
+  ["I stand by what I said.", "Noted. Please see Exhibit B."],
+  ["That was taken out of context.", "The context was a chair. The committee has the footage."],
+  ["I was speaking metaphorically.", "The committee notes that metaphors rarely involve bananas."],
+  ["I have never climbed anything.", "Reference: 12:30. The chair."],
+  ["I refuse to comment.", "She then commented for forty minutes."],
+  ["Fine. Maybe a little.", "The committee thanks the accused for her honesty."],
+];
+let qi = 0;
+$("nextQ").onclick = () => {
+  qi = (qi + 1) % statements.length;
+  $("quote").textContent = "“" + statements[qi][0] + "”";
+  $("resp").textContent = "Committee response: " + statements[qi][1];
 };
 
-// 🍌 Banana clicker
-let count = 0;
-const milestones = {
-  1: "Soha: ooh a banana 👀",
-  5: "Soha is getting excited 🙈",
-  10: "Soha: ooh ooh aah aah!!",
-  20: "Soha is now climbing the curtains 🧗‍♀️",
-  30: "Soha: I am NOT a monkey (eats 12th banana)",
-  50: "BREAKING: Soha has fully become a monkey 🐒",
-};
-$("banana").onclick = () => {
-  count++;
-  $("count").textContent = count;
-  if (milestones[count]) {
-    $("msg").textContent = milestones[count];
-    if (count >= 20) rain("🍌", 10);
-  }
+// Appeal
+const appeals = [
+  "Appeal denied. Please eat a banana and reconsider.",
+  "Appeal received, reviewed, and gently ignored.",
+  "The committee has consulted the chair. Appeal denied.",
+  "Your appeal has been filed under “Monkey, Soha”.",
+];
+$("appeal").onclick = () => {
+  $("appealOut").textContent = pick(appeals);
 };
